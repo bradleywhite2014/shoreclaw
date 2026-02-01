@@ -50,7 +50,7 @@ RUN apt-get update \
 WORKDIR /app
 
 # Wrapper deps
-COPY package.json ./
+COPY wrapper-package.json package.json
 RUN npm install --omit=dev && npm cache clean --force
 
 # Copy built openclaw
