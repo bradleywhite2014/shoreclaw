@@ -38,4 +38,4 @@ RUN mkdir -p /data/.openclaw /data/workspace && \
 
 USER node
 
-CMD ["node", "dist/index.js", "gateway", "--allow-unconfigured", "--port", "8080", "--bind", "lan", "--auth", "none"]
+CMD ["sh", "-c", "node dist/index.js gateway --allow-unconfigured --port 8080 --bind lan --auth password --password ${SETUP_PASSWORD:-shoreclaw123}"]
