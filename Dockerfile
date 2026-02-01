@@ -59,6 +59,9 @@ RUN npm install --omit=dev && npm cache clean --force
 # Copy built openclaw (includes everything, including templates)
 COPY --from=openclaw-build /openclaw /openclaw
 
+# Copy templates from local source (they may not survive the build)
+COPY docs/reference/templates /openclaw/docs/reference/templates
+
 # Provide an openclaw executable
 RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/dist/index.js "$@"' > /usr/local/bin/openclaw \
   && chmod +x /usr/local/bin/openclaw
