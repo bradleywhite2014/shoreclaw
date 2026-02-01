@@ -44,10 +44,7 @@ if [ -d /data ]; then\n\
     cat > /data/.openclaw/openclaw.json <<EOF\n\
 {\n\
   "gateway": {\n\
-    "trustedProxies": ["0.0.0.0/0"],\n\
-    "dm": {\n\
-      "policy": "open"\n\
-    }\n\
+    "trustedProxies": ["0.0.0.0/0"]\n\
   }\n\
 }\n\
 EOF\n\
