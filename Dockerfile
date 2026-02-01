@@ -36,6 +36,10 @@ ENV NODE_ENV=production
 RUN mkdir -p /data/.openclaw /data/workspace && \
     chown -R node:node /data
 
+# Copy initial config that disables pairing requirement
+COPY openclaw.config.json /data/.openclaw/openclaw.json
+RUN chown node:node /data/.openclaw/openclaw.json
+
 USER node
 
 CMD ["sh", "-c", "node dist/index.js gateway --port 8080 --bind lan --auth password --password ${SETUP_PASSWORD:-shoreclaw123}"]

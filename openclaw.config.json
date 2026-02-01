@@ -1,0 +1,12 @@
+{
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "mode": "password"
+    },
+    "dm": {
+      "policy": "open",
+      "allowFrom": ["*"]
+    }
+  }
+}
