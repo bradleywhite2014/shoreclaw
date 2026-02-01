@@ -1,0 +1,7 @@
+Portions of this software are derived from OpenClaw
+Copyright (c) 2025 Peter Steinberger
+Licensed under the MIT License (see LICENSE)
+
+Additional modifications and enhancements:
+Copyright (c) 2026 Bradley White
+All modifications are licensed under the MIT License unless otherwise noted.
