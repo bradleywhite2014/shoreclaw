@@ -132,7 +132,7 @@ export function renderApp(state: AppViewState) {
           </button>
           <div class="brand">
             <div class="brand-logo">
-              <img src="docs/assets/shoreclaw.png" alt="OpenClaw" />
+              <img src="shoreclaw.png" alt="ShoreClaw" />
             </div>
             <div class="brand-text">
               <div class="brand-title">ShoreClaw</div>
