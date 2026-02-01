@@ -44,7 +44,10 @@ if [ -d /data ]; then\n\
     cat > /data/.openclaw/openclaw.json <<EOF\n\
 {\n\
   "gateway": {\n\
-    "trustedProxies": ["0.0.0.0/0"]\n\
+    "trustedProxies": ["0.0.0.0/0"],\n\
+    "controlUi": {\n\
+      "dangerouslyDisableDeviceAuth": true\n\
+    }\n\
   }\n\
 }\n\
 EOF\n\
