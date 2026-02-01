@@ -1,4 +1,5 @@
-FROM node:22-bookworm
+# Build openclaw from local source (with Shore AgentOS branding)
+FROM node:22-bookworm AS openclaw-build
 
 # Install Bun (required for build scripts)
 RUN curl -fsSL https://bun.sh/install | bash
@@ -6,60 +7,43 @@ ENV PATH="/root/.bun/bin:${PATH}"
 
 RUN corepack enable
 
-WORKDIR /app
+WORKDIR /openclaw
 
-ARG OPENCLAW_DOCKER_APT_PACKAGES=""
-RUN if [ -n "$OPENCLAW_DOCKER_APT_PACKAGES" ]; then \
-      apt-get update && \
-      DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $OPENCLAW_DOCKER_APT_PACKAGES && \
-      apt-get clean && \
-      rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*; \
-    fi
-
-# Copy all files first to ensure pnpm-lock.yaml is available
+# Copy local source (includes Shore AgentOS branding)
 COPY . .
 
-# Install dependencies (allow lockfile update for Railway deployment)
+# Install dependencies and build
 RUN pnpm install --no-frozen-lockfile
 RUN OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build
-# Force pnpm for UI build (Bun may fail on ARM/Synology architectures)
 ENV OPENCLAW_PREFER_PNPM=1
 RUN pnpm ui:build
 
+# Runtime image
+FROM node:22-bookworm
 ENV NODE_ENV=production
 
-# Security hardening: Run as non-root user
-# The node:22-bookworm image includes a 'node' user (uid 1000)
-# This reduces the attack surface by preventing container escape via root privileges
+RUN apt-get update \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
-# Create entrypoint script to fix /data permissions at runtime
-RUN printf '#!/bin/bash\n\
-set -e\n\
-# Fix permissions on volume-mounted /data directory\n\
-if [ -d /data ]; then\n\
-  chown -R node:node /data 2>/dev/null || true\n\
-  # Create config if it does not exist\n\
-  if [ ! -f /data/.openclaw/openclaw.json ]; then\n\
-    mkdir -p /data/.openclaw 2>/dev/null || true\n\
-    cat > /data/.openclaw/openclaw.json <<EOF\n\
-{\n\
-  "gateway": {\n\
-    "trustedProxies": ["0.0.0.0/0"],\n\
-    "controlUi": {\n\
-      "dangerouslyDisableDeviceAuth": true\n\
-    }\n\
-  }\n\
-}\n\
-EOF\n\
-    chown -R node:node /data/.openclaw 2>/dev/null || true\n\
-  fi\n\
-fi\n\
-exec gosu node "$@"\n' > /usr/local/bin/entrypoint.sh && \
-    chmod +x /usr/local/bin/entrypoint.sh && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends gosu && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["sh", "-c", "node dist/index.js gateway --allow-unconfigured --port 8080 --bind lan --auth password --password ${SETUP_PASSWORD:-shoreclaw123}"]
+# Wrapper deps
+COPY railway-wrapper-package.json package.json
+RUN npm install --omit=dev && npm cache clean --force
+
+# Copy built openclaw
+COPY --from=openclaw-build /openclaw /openclaw
+
+# Provide an openclaw executable
+RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/dist/index.js "$@"' > /usr/local/bin/openclaw \
+  && chmod +x /usr/local/bin/openclaw
+
+COPY src ./src
+
+# The wrapper listens on this port
+ENV OPENCLAW_PUBLIC_PORT=8080
+ENV PORT=8080
+EXPOSE 8080
+CMD ["node", "src/server.js"]
