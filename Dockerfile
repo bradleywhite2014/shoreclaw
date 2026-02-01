@@ -20,9 +20,10 @@ RUN corepack enable
 
 WORKDIR /openclaw
 
-# Clone official OpenClaw (like the template does)
-ARG OPENCLAW_GIT_REF=main
-RUN git clone --depth 1 --branch "${OPENCLAW_GIT_REF}" https://github.com/openclaw/openclaw.git .
+# Clone official OpenClaw (pinned to last known working version)
+ARG OPENCLAW_GIT_REF=2026.1.30
+RUN git clone --depth 1 --branch "${OPENCLAW_GIT_REF}" https://github.com/openclaw/openclaw.git . || \
+    git clone https://github.com/openclaw/openclaw.git . && git checkout tags/2026.1.30
 
 # Patch: relax version requirements
 RUN set -eux; \
