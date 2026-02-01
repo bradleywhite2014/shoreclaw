@@ -50,3 +50,6 @@ vendor/
 # IMPORTANT: Include lock files for reproducible builds
 !pnpm-lock.yaml
 !package-lock.json
+
+# Include workspace templates needed at runtime
+!docs/reference/templates/

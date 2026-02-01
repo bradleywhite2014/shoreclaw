@@ -18,6 +18,9 @@ RUN OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build
 ENV OPENCLAW_PREFER_PNPM=1
 RUN pnpm ui:build
 
+# Ensure workspace templates are available at runtime
+RUN mkdir -p /openclaw/docs/reference/templates
+
 # Runtime image
 FROM node:22-bookworm
 ENV NODE_ENV=production
