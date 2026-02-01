@@ -234,11 +234,6 @@ app.get("/setup/app.js", requireSetupAuth, (_req, res) => {
   res.send(fs.readFileSync(path.join(process.cwd(), "src", "setup-app.js"), "utf8"));
 });
 
-app.get("/shore_agent.png", (_req, res) => {
-  res.type("image/png");
-  res.send(fs.readFileSync(path.join(process.cwd(), "src", "shore_agent.png")));
-});
-
 app.get("/setup", requireSetupAuth, (_req, res) => {
   // No inline <script>: serve JS from /setup/app.js to avoid any encoding/template-literal issues.
   res.type("html").send(`<!doctype html>
@@ -246,37 +241,26 @@ app.get("/setup", requireSetupAuth, (_req, res) => {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Shore AgentOS Setup</title>
+  <title>OpenClaw Setup</title>
   <style>
     body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 2rem; max-width: 900px; }
-    .header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
-    .logo { width: 80px; height: 80px; }
-    .card { border: 1px solid #0ea5e9; border-radius: 12px; padding: 1.25rem; margin: 1rem 0; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 1.25rem; margin: 1rem 0; }
     label { display:block; margin-top: 0.75rem; font-weight: 600; }
-    input, select { width: 100%; padding: 0.6rem; margin-top: 0.25rem; border: 1px solid #ddd; border-radius: 6px; }
-    button { padding: 0.8rem 1.2rem; border-radius: 10px; border: 0; background: #0ea5e9; color: #fff; font-weight: 700; cursor: pointer; }
-    button:hover { background: #0284c7; }
-    code { background: #f0f9ff; padding: 0.1rem 0.3rem; border-radius: 6px; color: #0369a1; }
+    input, select { width: 100%; padding: 0.6rem; margin-top: 0.25rem; }
+    button { padding: 0.8rem 1.2rem; border-radius: 10px; border: 0; background: #111; color: #fff; font-weight: 700; cursor: pointer; }
+    code { background: #f6f6f6; padding: 0.1rem 0.3rem; border-radius: 6px; }
     .muted { color: #555; }
-    a { color: #0ea5e9; text-decoration: none; }
-    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <img src="/shore_agent.png" alt="Shore AgentOS" class="logo" />
-    <div>
-      <h1 style="margin: 0;">Shore AgentOS Setup</h1>
-      <p class="muted" style="margin: 0.25rem 0 0 0;">Configure your AI assistant</p>
-    </div>
-  </div>
-  <p class="muted">This wizard configures Shore AgentOS by running the same onboarding command it uses in the terminal, but from the browser.</p>
+  <h1>OpenClaw Setup</h1>
+  <p class="muted">This wizard configures OpenClaw by running the same onboarding command it uses in the terminal, but from the browser.</p>
 
   <div class="card">
     <h2>Status</h2>
     <div id="status">Loading...</div>
     <div style="margin-top: 0.75rem">
-      <a href="/openclaw" target="_blank">Open Shore AgentOS UI</a>
+      <a href="/openclaw" target="_blank">Open OpenClaw UI</a>
       &nbsp;|&nbsp;
       <a href="/setup/export" target="_blank">Download backup (.tar.gz)</a>
     </div>
@@ -284,7 +268,7 @@ app.get("/setup", requireSetupAuth, (_req, res) => {
     <div style="margin-top: 0.75rem">
       <div class="muted" style="margin-bottom:0.25rem"><strong>Import backup</strong> (advanced): restores into <code>/data</code> and restarts the gateway.</div>
       <input id="importFile" type="file" accept=".tar.gz,application/gzip" />
-      <button id="importRun" style="background:#0284c7; margin-top:0.5rem">Import</button>
+      <button id="importRun" style="background:#7c2d12; margin-top:0.5rem">Import</button>
       <pre id="importOut" style="white-space:pre-wrap"></pre>
     </div>
   </div>
@@ -306,7 +290,7 @@ app.get("/setup", requireSetupAuth, (_req, res) => {
         <option value="openclaw.version">openclaw --version</option>
       </select>
       <input id="consoleArg" placeholder="Optional arg (e.g. 200, gateway.port)" style="flex: 1" />
-      <button id="consoleRun" style="background:#0ea5e9">Run</button>
+      <button id="consoleRun" style="background:#0f172a">Run</button>
     </div>
     <pre id="consoleOut" style="white-space:pre-wrap"></pre>
   </div>
@@ -317,8 +301,8 @@ app.get("/setup", requireSetupAuth, (_req, res) => {
     <div class="muted" id="configPath"></div>
     <textarea id="configText" style="width:100%; height: 260px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;"></textarea>
     <div style="margin-top:0.5rem">
-      <button id="configReload" style="background:#0284c7">Reload</button>
-      <button id="configSave" style="background:#0ea5e9; margin-left:0.5rem">Save</button>
+      <button id="configReload" style="background:#1f2937">Reload</button>
+      <button id="configSave" style="background:#111; margin-left:0.5rem">Save</button>
     </div>
     <pre id="configOut" style="white-space:pre-wrap"></pre>
   </div>
@@ -345,7 +329,7 @@ app.get("/setup", requireSetupAuth, (_req, res) => {
 
   <div class="card">
     <h2>2) Optional: Channels</h2>
-    <p class="muted">You can also add channels later inside Shore AgentOS, but this helps you get messaging working immediately.</p>
+    <p class="muted">You can also add channels later inside OpenClaw, but this helps you get messaging working immediately.</p>
 
     <label>Telegram bot token (optional)</label>
     <input id="telegramToken" type="password" placeholder="123456:ABC..." />
@@ -370,10 +354,10 @@ app.get("/setup", requireSetupAuth, (_req, res) => {
   <div class="card">
     <h2>3) Run onboarding</h2>
     <button id="run">Run setup</button>
-    <button id="pairingApprove" style="background:#0284c7; margin-left:0.5rem">Approve pairing</button>
+    <button id="pairingApprove" style="background:#1f2937; margin-left:0.5rem">Approve pairing</button>
     <button id="reset" style="background:#444; margin-left:0.5rem">Reset setup</button>
     <pre id="log" style="white-space:pre-wrap"></pre>
-    <p class="muted">Reset deletes the Shore AgentOS config file so you can rerun onboarding. Pairing approval lets you grant DM access when dmPolicy=pairing.</p>
+    <p class="muted">Reset deletes the OpenClaw config file so you can rerun onboarding. Pairing approval lets you grant DM access when dmPolicy=pairing.</p>
   </div>
 
   <script src="/setup/app.js"></script>
