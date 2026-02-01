@@ -31,12 +31,6 @@ ENV NODE_ENV=production
 # Security hardening: Run as non-root user
 # The node:22-bookworm image includes a 'node' user (uid 1000)
 # This reduces the attack surface by preventing container escape via root privileges
-
-# Copy entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
 USER node
 
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["node", "dist/index.js", "gateway", "--port", "8080", "--bind", "lan", "--auth", "password", "--password", "shoreclaw123"]
+CMD ["node", "dist/index.js"]
