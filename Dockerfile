@@ -19,8 +19,8 @@ RUN if [ -n "$OPENCLAW_DOCKER_APT_PACKAGES" ]; then \
 # Copy all files first to ensure pnpm-lock.yaml is available
 COPY . .
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (allow lockfile update for Railway deployment)
+RUN pnpm install --no-frozen-lockfile
 RUN OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build
 # Force pnpm for UI build (Bun may fail on ARM/Synology architectures)
 ENV OPENCLAW_PREFER_PNPM=1
