@@ -38,6 +38,21 @@ set -e\n\
 # Fix permissions on volume-mounted /data directory\n\
 if [ -d /data ]; then\n\
   chown -R node:node /data 2>/dev/null || true\n\
+  # Create config if it does not exist\n\
+  if [ ! -f /data/openclaw.json ]; then\n\
+    mkdir -p /data 2>/dev/null || true\n\
+    cat > /data/openclaw.json <<EOF\n\
+{\n\
+  "gateway": {\n\
+    "trustedProxies": ["0.0.0.0/0"],\n\
+    "dm": {\n\
+      "policy": "open"\n\
+    }\n\
+  }\n\
+}\n\
+EOF\n\
+    chown node:node /data/openclaw.json 2>/dev/null || true\n\
+  fi\n\
 fi\n\
 exec gosu node "$@"\n' > /usr/local/bin/entrypoint.sh && \
     chmod +x /usr/local/bin/entrypoint.sh && \
