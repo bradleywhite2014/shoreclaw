@@ -1,7 +1,18 @@
-# Build openclaw from local source (with Shore AgentOS branding)
+# Build openclaw from source (official template approach)
 FROM node:22-bookworm AS openclaw-build
 
-# Install Bun (required for build scripts)
+# Dependencies needed for openclaw build
+RUN apt-get update \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    git \
+    ca-certificates \
+    curl \
+    python3 \
+    make \
+    g++ \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install Bun (openclaw build uses it)
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:${PATH}"
 
@@ -9,17 +20,26 @@ RUN corepack enable
 
 WORKDIR /openclaw
 
-# Copy local source (includes Shore AgentOS branding)
-COPY . .
+# Clone official OpenClaw (like the template does)
+ARG OPENCLAW_GIT_REF=main
+RUN git clone --depth 1 --branch "${OPENCLAW_GIT_REF}" https://github.com/openclaw/openclaw.git .
 
-# Install dependencies and build
+# Patch: relax version requirements
+RUN set -eux; \
+  find ./extensions -name 'package.json' -type f | while read -r f; do \
+    sed -i -E 's/"openclaw"[[:space:]]*:[[:space:]]*">=[^"]+"/"openclaw": "*"/g' "$f"; \
+    sed -i -E 's/"openclaw"[[:space:]]*:[[:space:]]*"workspace:[^"]+"/"openclaw": "*"/g' "$f"; \
+  done
+
 RUN pnpm install --no-frozen-lockfile
-RUN OPENCLAW_A2UI_SKIP_MISSING=1 pnpm build
+RUN pnpm build
 ENV OPENCLAW_PREFER_PNPM=1
-RUN pnpm ui:build
+RUN pnpm ui:install && pnpm ui:build
 
-# Ensure workspace templates are available at runtime
-RUN mkdir -p /openclaw/docs/reference/templates
+# Apply Shore AgentOS branding to the built UI
+COPY ui/public/shore_agent.png /openclaw/ui/dist/shore_agent.png
+RUN sed -i 's/shoreclaw\.png/shore_agent.png/g' /openclaw/ui/dist/index.html
+RUN sed -i 's/OpenClaw/Shore AgentOS/g' /openclaw/ui/dist/index.html
 
 # Runtime image
 FROM node:22-bookworm
@@ -36,11 +56,8 @@ WORKDIR /app
 COPY railway-wrapper-package.json package.json
 RUN npm install --omit=dev && npm cache clean --force
 
-# Copy built openclaw
+# Copy built openclaw (includes everything, including templates)
 COPY --from=openclaw-build /openclaw /openclaw
-
-# Ensure workspace templates are available
-COPY --from=openclaw-build /openclaw/docs/reference/templates /openclaw/docs/reference/templates
 
 # Provide an openclaw executable
 RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/dist/index.js "$@"' > /usr/local/bin/openclaw \
