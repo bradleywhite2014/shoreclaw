@@ -47,4 +47,4 @@ exec gosu node "$@"\n' > /usr/local/bin/entrypoint.sh && \
     rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["sh", "-c", "node dist/index.js gateway --port 8080 --bind lan --auth password --password ${SETUP_PASSWORD:-shoreclaw123}"]
+CMD ["sh", "-c", "node dist/index.js gateway --allow-unconfigured --port 8080 --bind lan --auth password --password ${SETUP_PASSWORD:-shoreclaw123}"]
