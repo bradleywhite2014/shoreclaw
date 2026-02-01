@@ -39,9 +39,9 @@ set -e\n\
 if [ -d /data ]; then\n\
   chown -R node:node /data 2>/dev/null || true\n\
   # Create config if it does not exist\n\
-  if [ ! -f /data/openclaw.json ]; then\n\
-    mkdir -p /data 2>/dev/null || true\n\
-    cat > /data/openclaw.json <<EOF\n\
+  if [ ! -f /data/.openclaw/openclaw.json ]; then\n\
+    mkdir -p /data/.openclaw 2>/dev/null || true\n\
+    cat > /data/.openclaw/openclaw.json <<EOF\n\
 {\n\
   "gateway": {\n\
     "trustedProxies": ["0.0.0.0/0"],\n\
@@ -51,7 +51,7 @@ if [ -d /data ]; then\n\
   }\n\
 }\n\
 EOF\n\
-    chown node:node /data/openclaw.json 2>/dev/null || true\n\
+    chown -R node:node /data/.openclaw 2>/dev/null || true\n\
   fi\n\
 fi\n\
 exec gosu node "$@"\n' > /usr/local/bin/entrypoint.sh && \
