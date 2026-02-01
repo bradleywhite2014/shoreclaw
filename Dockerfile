@@ -32,14 +32,11 @@ ENV NODE_ENV=production
 # The node:22-bookworm image includes a 'node' user (uid 1000)
 # This reduces the attack surface by preventing container escape via root privileges
 
-# Create data directory and set permissions before switching to node user
-RUN mkdir -p /data/.openclaw /data/workspace && \
-    chown -R node:node /data
-
-# Copy initial config that disables pairing requirement
-COPY openclaw.config.json /data/.openclaw/openclaw.json
-RUN chown node:node /data/.openclaw/openclaw.json
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 USER node
 
-CMD ["sh", "-c", "node dist/index.js gateway --port 8080 --bind lan --auth password --password ${SETUP_PASSWORD:-shoreclaw123}"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["node", "dist/index.js", "gateway", "--port", "8080", "--bind", "lan", "--auth", "password", "--password", "shoreclaw123"]
