@@ -31,6 +31,20 @@ ENV NODE_ENV=production
 # Security hardening: Run as non-root user
 # The node:22-bookworm image includes a 'node' user (uid 1000)
 # This reduces the attack surface by preventing container escape via root privileges
-USER node
 
+# Create entrypoint script to fix /data permissions at runtime
+RUN printf '#!/bin/bash\n\
+set -e\n\
+# Fix permissions on volume-mounted /data directory\n\
+if [ -d /data ]; then\n\
+  chown -R node:node /data 2>/dev/null || true\n\
+fi\n\
+exec gosu node "$@"\n' > /usr/local/bin/entrypoint.sh && \
+    chmod +x /usr/local/bin/entrypoint.sh && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends gosu && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["node", "dist/index.js", "gateway", "--allow-unconfigured"]
