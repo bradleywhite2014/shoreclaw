@@ -956,6 +956,11 @@ app.use(async (req, res) => {
     }
   }
 
+  // Inject Bearer token so the gateway doesn't return WWW-Authenticate: Basic
+  // (which poisons the browser's auth cache and breaks WebSocket).
+  if (OPENCLAW_GATEWAY_TOKEN) {
+    req.headers.authorization = `Bearer ${OPENCLAW_GATEWAY_TOKEN}`;
+  }
   return proxy.web(req, res, { target: GATEWAY_TARGET });
 });
 
@@ -981,6 +986,10 @@ server.on("upgrade", async (req, socket, head) => {
   } catch {
     socket.destroy();
     return;
+  }
+  // Inject Bearer token for WS upgrade too
+  if (OPENCLAW_GATEWAY_TOKEN) {
+    req.headers.authorization = `Bearer ${OPENCLAW_GATEWAY_TOKEN}`;
   }
   proxy.ws(req, socket, head, { target: GATEWAY_TARGET });
 });
